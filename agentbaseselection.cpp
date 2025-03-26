@@ -6,6 +6,11 @@ AgentBaseSelection::AgentBaseSelection(MainWindow *parent)
     , ui(new Ui::AgentBaseSelection)
 {
     ui->setupUi(this);
+    auto objects = parent->getObjects();
+    for (auto object : objects)
+    {
+
+    }
 }
 
 AgentBaseSelection::~AgentBaseSelection()

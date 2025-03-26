@@ -35,6 +35,8 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+    QHash<QString,QSharedPointer<QGraphicsItem> > getObjects() const;
+
 private:
     void createObject();
     void createAgent();
@@ -46,7 +48,8 @@ private:
     void addAgentToToolbar(Agent *agent, const QString &name);
 
     QList<Agent*> agents;
-    QList<QSharedPointer<QGraphicsItem>> objects;
+    QHash<QString,QSharedPointer<QGraphicsItem>> objects;
+    QList<QSharedPointer<QGraphicsItem>> innerObjects;
 
     Subject *subject;
     bool isSimulationRunning;

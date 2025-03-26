@@ -46,8 +46,7 @@ void MainWindow::createObject() {
         if (rawItem) {
             QSharedPointer<QGraphicsPathItem> item(rawItem);
 
-            qDebug() << "5. Объект получен:" << item;
-            objects.append(item);
+            objects[editor.getObjectName()] = item;
             addObjectToToolbar(item, editor.getObjectName(), editor.hasCollision());
         }
     }
@@ -57,10 +56,10 @@ void MainWindow::createAgent() {
 
 
 
-    Agent *agent = new Agent(item, this);
-    agents.append(agent);
-    connect(subject, &Subject::notify, agent, &Agent::update); // Подписываем агента на сигнал
-    addAgentToToolbar(agent, "Агент " + QString::number(agents.size()));
+    // //Agent *agent = new Agent(item, this);
+    // agents.append(agent);
+    // connect(subject, &Subject::notify, agent, &Agent::update); // Подписываем агента на сигнал
+    // addAgentToToolbar(agent, "Агент " + QString::number(agents.size()));
 }
 
 void MainWindow::saveSimulation() {
@@ -122,7 +121,7 @@ void MainWindow::loadSimulation() {
         QSharedPointer<QGraphicsItem> item(ui->graphicsView->scene()->addRect(0, 0, 50, 50, QPen(Qt::black), QBrush(Qt::blue)));
         item->setPos(obj["x"].toDouble(), obj["y"].toDouble());
         item->setData(Qt::UserRole, obj["name"].toString());
-        objects.append(item);
+        //objects.append(item);
     }
 
     // Загружаем агентов
@@ -159,12 +158,14 @@ QGraphicsPathItem* clonePathItem(const QGraphicsPathItem* original) {
 void MainWindow::addObjectToToolbar(QSharedPointer<QGraphicsPathItem> item, const QString &name, bool hasCollision) {
     QToolButton* button = new QToolButton(this);
     button->setText(name);
+    qDebug() << item;
     connect(button, &QToolButton::clicked, this, [this, item]() {
         QSharedPointer<QGraphicsPathItem> pathItem = QSharedPointer<QGraphicsPathItem>(clonePathItem(item.get()));
+        qDebug() << pathItem.get()->path();
         if (pathItem){
         pathItem->setFlag(QGraphicsItem::ItemIsMovable);
         ui->graphicsView->scene()->addItem(pathItem.get());
-        objects.append(pathItem);
+        innerObjects.append(pathItem);
         }
     });
     ui->objectToolBar->addWidget(button);
@@ -183,9 +184,13 @@ void MainWindow::addAgentToToolbar(Agent *agent, const QString &name) {
     ui->agentToolBar->addWidget(button);
 }
 
+QHash<QString, QSharedPointer<QGraphicsItem> > MainWindow::getObjects() const
+{
+    return objects;
+}
+
 MainWindow::~MainWindow()
 {
-    // В MainWindow
         qDebug() << "MainWindow уничтожен!" << this;
 
     delete ui;
