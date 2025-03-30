@@ -16,9 +16,21 @@ public:
     explicit AgentBaseSelection(MainWindow *parent = nullptr);
     ~AgentBaseSelection();
 
+    QString getName() const;
+
+    QString getCode() const;
+
 private:
 
     Ui::AgentBaseSelection *ui;
+    const QHash<QString,QPainterPath>& objects;
+    QGraphicsPathItem* currentObject;
+    QString name;
+    QString code;
+
+    void okButtonPress();
+    void OnSelectionUpdate();
+    void updatePreview(const QPainterPath &newObject);
 };
 
 #endif // AGENTBASESELECTION_H

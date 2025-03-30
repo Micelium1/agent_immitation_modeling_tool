@@ -76,6 +76,7 @@ void ObjectEditor::okButtonPress()
         accept();
     } else {
         QMessageBox::warning(this, "Ошибка", "Нарисуйте объект перед сохранением!");
+        return;
     }
 }
 void ObjectEditor::mousePressEvent(QMouseEvent *event) {
@@ -138,7 +139,5 @@ bool ObjectEditor::hasCollision() const {
 
 ObjectEditor::~ObjectEditor()
 {
-    qDebug() << "ObjectEditor уничтожен!" << this;
-    ui->view->scene()->removeItem(currentPathItem);
     delete ui;
 }

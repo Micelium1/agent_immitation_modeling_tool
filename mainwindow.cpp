@@ -1,5 +1,8 @@
 #include "mainwindow.h"
+#include "agentbaseselection.h"
+#include "agentfactory.h"
 #include "ui_mainwindow.h"
+#include "object.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -26,28 +29,27 @@ MainWindow::MainWindow(QWidget *parent)
     connect(createAgentButton, &QPushButton::clicked, this, &MainWindow::createAgent);
 
     // Сохранение симуляции
-    connect(ui->saveButton, &QPushButton::clicked, this, &MainWindow::saveSimulation);
+    //connect(ui->saveButton, &QPushButton::clicked, this, &MainWindow::saveSimulation);
 
     // Загрузка симуляции
-    connect(ui->loadButton, &QPushButton::clicked, this, &MainWindow::loadSimulation);
+    //connect(ui->loadButton, &QPushButton::clicked, this, &MainWindow::loadSimulation);
 
     // Запуск симуляции
     connect(ui->playButton, &QPushButton::clicked, this, &MainWindow::startSimulation);
     // Остановка симуляции
     connect(ui->pauseButton, &QPushButton::clicked, this, &MainWindow::stopSimulation);
-    //createObject();
 }
 
 void MainWindow::createObject() {
     ObjectEditor editor(this);
     editor.setModal(true);
     if (editor.exec() == QDialog::Accepted) {
-        QGraphicsPathItem* rawItem = editor.getCreatedItem();
-        if (rawItem) {
-            QSharedPointer<QGraphicsPathItem> item(rawItem);
+        QPainterPath rawItem = editor.getCreatedItem()->path();
+        if (!rawItem.isEmpty()) {
 
-            objects[editor.getObjectName()] = item;
-            addObjectToToolbar(item, editor.getObjectName(), editor.hasCollision());
+            shapes[editor.getObjectName()] = rawItem;
+            QString name = editor.getObjectName();
+            addObjectToToolbar(name, editor.hasCollision());
         }
     }
 }
@@ -55,14 +57,17 @@ void MainWindow::createObject() {
 void MainWindow::createAgent() {
 
 
+    AgentBaseSelection selection(this);
+    if (selection.exec() == QDialog::Accepted) {
 
-    // //Agent *agent = new Agent(item, this);
-    // agents.append(agent);
-    // connect(subject, &Subject::notify, agent, &Agent::update); // Подписываем агента на сигнал
-    // addAgentToToolbar(agent, "Агент " + QString::number(agents.size()));
+    }
+    QString objectName = selection.getName();
+    QString code = selection.getCode();
+    agentFactories.emplace("default", AgentFactory(shapes[objectName], code, "default"));
+    addAgentToToolbar();
 }
 
-void MainWindow::saveSimulation() {
+/*void MainWindow::saveSimulation() {
     QString fileName = QFileDialog::getSaveFileName(this, "Сохранить симуляцию", "", "JSON Files (*.json)");
     if (fileName.isEmpty()) return;
 
@@ -96,9 +101,9 @@ void MainWindow::saveSimulation() {
         file.write(QJsonDocument(root).toJson());
         file.close();
     }
-}
+}*/
 
-void MainWindow::loadSimulation() {
+/*void MainWindow::loadSimulation() {
     QString fileName = QFileDialog::getOpenFileName(this, "Загрузить симуляцию", "", "JSON Files (*.json)");
     if (fileName.isEmpty()) return;
 
@@ -135,7 +140,7 @@ void MainWindow::loadSimulation() {
         agents.append(agent);
         connect(subject, &Subject::notify, agent, &Agent::update); // Подписываем агента на сигнал
     }
-}
+}*/
 
 void MainWindow::startSimulation() {
     if (isSimulationRunning) return;
@@ -146,47 +151,43 @@ void MainWindow::stopSimulation() {
     isSimulationRunning = false;
 }
 
-QGraphicsPathItem* clonePathItem(const QGraphicsPathItem* original) {
-    if (!original) return nullptr;
-    QGraphicsPathItem* clone = new QGraphicsPathItem();
-    clone->setPath(original->path());
-    clone->setPen(original->pen());
-    clone->setBrush(original->brush());
-    clone->setFlags(original->flags());
-    return clone;
-}
-void MainWindow::addObjectToToolbar(QSharedPointer<QGraphicsPathItem> item, const QString &name, bool hasCollision) {
+void MainWindow::addObjectToToolbar(const QString &name, bool hasCollision) {
     QToolButton* button = new QToolButton(this);
     button->setText(name);
-    qDebug() << item;
-    connect(button, &QToolButton::clicked, this, [this, item]() {
-        QSharedPointer<QGraphicsPathItem> pathItem = QSharedPointer<QGraphicsPathItem>(clonePathItem(item.get()));
-        qDebug() << pathItem.get()->path();
-        if (pathItem){
-        pathItem->setFlag(QGraphicsItem::ItemIsMovable);
-        ui->graphicsView->scene()->addItem(pathItem.get());
-        innerObjects.append(pathItem);
+    connect (button, &QToolButton::clicked, this, [this, name]() {
+        static long int id = 0;
+        objects.insert(id,QSharedPointer<Object>::create(name,shapes[name]));
+        auto object = objects.find(id);
+        if (object != objects.end()) {
+            ui->graphicsView->scene()->addItem(object.value()->graphicsItem());
+            ++id;
         }
     });
     ui->objectToolBar->addWidget(button);
 }
 
 
-void MainWindow::addAgentToToolbar(Agent *agent, const QString &name) {
+void MainWindow::addAgentToToolbar(const QString& agentName) {
     QToolButton *button = new QToolButton(this);
-    button->setText(name);
-    connect(button, &QToolButton::clicked, this, [this, agent]() {
-        Agent *newAgent = new Agent(agent->getItem(), this);
-        agents.append(newAgent);
-        connect(subject, &Subject::notify, newAgent, &Agent::update); // Подписываем нового агента на сигнал
-        ui->graphicsView->scene()->addItem(newAgent->getItem());
+    button->setText(agentName);
+    connect(button, &QToolButton::clicked, this,[agentName, this](){
+        static long int id = 0;
+        auto corresponding_factory = agentFactories.find(agentName);
+        if (corresponding_factory != agentFactories.end()){
+        agents.insert(id,corresponding_factory->createAgent(id));
+        ui->graphicsView->scene()->addItem(agents[id].data()->graphicsItem());
+        ++id;
+        }
     });
     ui->agentToolBar->addWidget(button);
 }
 
-QHash<QString, QSharedPointer<QGraphicsItem> > MainWindow::getObjects() const
+
+
+
+const QHash<QString,QPainterPath>& MainWindow::getObjects() const
 {
-    return objects;
+    return shapes;
 }
 
 MainWindow::~MainWindow()

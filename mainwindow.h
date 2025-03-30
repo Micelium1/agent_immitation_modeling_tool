@@ -17,10 +17,11 @@
 #include <QJsonArray>
 #include <QGraphicsItem>
 
+#include "agentfactory.h"
 #include "subject.h"
 #include "agent.h"
 #include "objecteditor.h"
-
+#include "object.h"
 QT_BEGIN_NAMESPACE
 namespace Ui {
 class MainWindow;
@@ -35,7 +36,7 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    QHash<QString,QSharedPointer<QGraphicsItem> > getObjects() const;
+    const QHash<QString, QPainterPath>& getObjects() const;
 
 private:
     void createObject();
@@ -44,12 +45,13 @@ private:
     void loadSimulation();
     void startSimulation();
     void stopSimulation();
-    void addObjectToToolbar(QSharedPointer<QGraphicsPathItem> item, const QString &name, bool hasCollision);
-    void addAgentToToolbar(Agent *agent, const QString &name);
+    void addObjectToToolbar(const QString& name, bool hasCollision);
+    void addAgentToToolbar(const QString &agentName = "default");
 
-    QList<Agent*> agents;
-    QHash<QString,QSharedPointer<QGraphicsItem>> objects;
-    QList<QSharedPointer<QGraphicsItem>> innerObjects;
+    QHash<QString,AgentFactory> agentFactories;
+    QHash<QString,QPainterPath> shapes;
+    QHash<long int,QSharedPointer<Object>> objects;
+    QHash<long int,QSharedPointer<Agent>> agents;
 
     Subject *subject;
     bool isSimulationRunning;
