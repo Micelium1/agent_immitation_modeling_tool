@@ -25,7 +25,7 @@ void AgentBaseSelection::okButtonPress()
     auto selected = ui->objectList->selectedItems();
     if (!selected.isEmpty())
     {
-        AgentLogicInput* inp = new AgentLogicInput();
+        AgentLogicInput* inp = new AgentLogicInput(this->parentWidget());
         inp->exec();
         name = selected[0]->text();
         code = inp->getCode();
@@ -58,9 +58,14 @@ AgentBaseSelection::~AgentBaseSelection()
     delete ui;
 }
 
-QString AgentBaseSelection::getName() const
+QString AgentBaseSelection::getShapeName() const
 {
     return name;
+}
+
+QString AgentBaseSelection::getAgentName() const
+{
+    return ui->nameEdit->text();
 }
 
 QString AgentBaseSelection::getCode() const

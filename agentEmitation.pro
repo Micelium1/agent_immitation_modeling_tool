@@ -14,10 +14,12 @@ SOURCES += \
     agentcommand.cpp \
     agentfactory.cpp \
     agentlogicinput.cpp \
+    mailmanager.cpp \
     main.cpp \
     mainwindow.cpp \
     object.cpp \
     objecteditor.cpp \
+    projectmanager.cpp \
     subject.cpp
 
 HEADERS += \
@@ -26,16 +28,19 @@ HEADERS += \
     agentcommand.h \
     agentfactory.h \
     agentlogicinput.h \
+    mailmanager.h \
     mainwindow.h \
     object.h \
     objecteditor.h \
+    projectmanager.h \
     subject.h
 
 FORMS += \
     agentbaseselection.ui \
     agentlogicinput.ui \
     mainwindow.ui \
-    objecteditor.ui
+    objecteditor.ui \
+    projectmanager.ui
 
 #путь к SCINTILLA
 QSCINTILLA_PATH = $$[QT_INSTALL_PREFIX]
@@ -52,3 +57,6 @@ LIBS += -L"$$PYTHON_DIR/libs" -lpython$$PYTHON_VERSION
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+RESOURCES += \
+    sourse.qrc

@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/python">
+        <file alias="template">pythemp/template.py</file>
+    </qresource>
+</RCC>

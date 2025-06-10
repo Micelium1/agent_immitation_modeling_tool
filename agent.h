@@ -3,34 +3,41 @@
 
 #include "object.h"
 #include <QProcess>
-
+#include <QJsonArray>
 class Agent : public Object
 {
     Q_OBJECT;
 public:
-    explicit Agent(const long id,const QPainterPath& shape, const QString& pythonCode, const QString& name = "agent", QGraphicsItem* parent = nullptr);
+    explicit Agent(const long id,const QPainterPath& shape, const QString& pythonCodePath, const QString& shapeName, const QString& name = "agent",QPointF pos = QPointF(0,0), QGraphicsItem* parent = nullptr);
 
     ~Agent();
 
-    // Сериализация с доп. данными агента
     QJsonObject toJson() const override;
 
     void startExecution();
     void stopExecution();
 
+
+
+    void sendMessage(QJsonObject message) {mailbox.append(message);};
+
+
+
 signals:
     void commandReady(const QJsonObject& command);
 
 public slots:
-    void handleSimulationTick(const QJsonObject& state);
+    void handleSimulationTick(QJsonObject state);
 
 private:
+    QJsonArray collectMail();
+    QJsonArray getCollisionList();
     void initPythonProcess();
-    QString wrapCode(const QString& code) const;
     QString m_name;
     long m_id;
     QProcess* m_process;
-    QString m_pythonCode;
+    QString m_pythonCodePath;
+    QList<QJsonObject> mailbox;
 };
 
 #endif // AGENT_H

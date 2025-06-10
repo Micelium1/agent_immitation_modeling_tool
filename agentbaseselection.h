@@ -16,7 +16,9 @@ public:
     explicit AgentBaseSelection(MainWindow *parent = nullptr);
     ~AgentBaseSelection();
 
-    QString getName() const;
+    QString getShapeName() const;
+
+    QString getAgentName() const;
 
     QString getCode() const;
 

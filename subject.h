@@ -9,12 +9,18 @@ class Subject : public QObject {
 
 public:
     Subject(QObject *parent = nullptr);
-
+    void start(int interval);
+    void stop();
+    ~Subject();
+    bool isRunning() const;
+    void setInterval(int msec);
+    int interval() const;
+    void printListeners();
 signals:
-    void notify(); // Сигнал для уведомления наблюдателей
+    void notify();
 
 private:
-    QTimer *timer;
+    QTimer* m_timer;
 };
 
 #endif // SUBJECT_H

@@ -21,6 +21,7 @@ public:
 private:
     Ui::AgentLogicInput *ui;
     QsciScintilla* editor;
+    void loadLogicButtonPress();
 };
 
 #endif // AGENTLOGICINPUT_H

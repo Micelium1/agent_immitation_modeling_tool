@@ -49,30 +49,27 @@ ObjectEditor::ObjectEditor(QWidget *parent) :
     ui->verticalLayout->replaceWidget(ui->view,customView);
     delete ui->view;
     ui->view = customView;
-    // Явно устанавливаем размер сцены
     ui->view->scene()->setSceneRect(-1000, -1000, 2000, 2000);
 
-    // Отключаем все автоматические трансформации
     ui->view->setTransformationAnchor(QGraphicsView::NoAnchor);
     ui->view->setResizeAnchor(QGraphicsView::NoAnchor);
     ui->view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     ui->view->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     ui->view->setRenderHint(QPainter::Antialiasing);
-    ui->view->setTransform(QTransform()); // Сбросить масштаб/поворот
-    ui->view->setSceneRect(QRectF());    // Убедиться, что сцена не масштабируется
-
+    ui->view->setTransform(QTransform());
+    ui->view->setSceneRect(QRectF());
 
 
     connect(customView,&CustomGraphicsView::mousePressed,this,&ObjectEditor::mousePressEvent);
     connect(customView,&CustomGraphicsView::mouseMoved,this,&ObjectEditor::mouseMoveEvent);
     connect(customView,&CustomGraphicsView::mouseReleased,this,&ObjectEditor::mouseReleaseEvent);
 
-    connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &ObjectEditor::okButtonPress);
+    connect(ui->okButton, &QPushButton::clicked, this, &ObjectEditor::okButtonPress);
+    connect(ui->cancelButton,&QPushButton::clicked,this,&QDialog::reject);
 }
 void ObjectEditor::okButtonPress()
 {
     if (currentPathItem) {
-        currentPathItem->setFlag(QGraphicsItem::ItemIsMovable);
         accept();
     } else {
         QMessageBox::warning(this, "Ошибка", "Нарисуйте объект перед сохранением!");
@@ -84,7 +81,6 @@ void ObjectEditor::mousePressEvent(QMouseEvent *event) {
     {
         if (event->button() == Qt::LeftButton && ui->view->underMouse())
         {
-            qDebug() << "First start";
             isDrawing = true;
             currentPath = QPainterPath();
             QPointF scenePos = ui->view->mapToScene(event->pos());
@@ -97,7 +93,6 @@ void ObjectEditor::mousePressEvent(QMouseEvent *event) {
     {
         if (event->button() == Qt::LeftButton && ui->view->underMouse())
         {
-            qDebug() << "Other start";
             QPointF scenePos = ui->view->mapToScene(event->pos());
             isDrawing = true;
             currentPath.lineTo(scenePos);
@@ -133,9 +128,7 @@ QString ObjectEditor::getObjectName() const {
     return ui->nameEdit->text();
 }
 
-bool ObjectEditor::hasCollision() const {
-    return ui->collisionCheckBox->isChecked();
-}
+
 
 ObjectEditor::~ObjectEditor()
 {

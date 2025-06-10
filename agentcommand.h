@@ -11,13 +11,19 @@ struct AgentCommand {
         MOVE,
         SET_POSITION,
         SET_COLOR,
-        SET_SHAPE
+        SET_SHAPE,
+        SPAWN,
+        STOP,
+        MESSAGE,
+        ROTATE,
+        DELETE
     };
 
     Type type;
-    QPointF delta;
+    QVariantMap params;
     QColor color;
     QPainterPath path;
+    long id;
 
     static AgentCommand fromJson(const QJsonObject& json);
     QJsonObject toJson() const;
